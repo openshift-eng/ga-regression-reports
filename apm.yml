@@ -1,0 +1,14 @@
+name: ga-regression-reports
+version: 1.0.0
+description: GA regression report generation for OpenShift releases
+
+dependencies:
+  apm:
+    - git: https://github.com/openshift-eng/ai-helpers.git
+      path: plugins/teams
+      ref: main
+      alias: teams
+    - git: https://github.com/openshift-eng/ai-helpers.git
+      path: plugins/ci
+      ref: main
+      alias: ci
