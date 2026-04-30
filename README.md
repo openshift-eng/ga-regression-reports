@@ -10,6 +10,14 @@ that we failed to fix in the release.
 
 We also will filter out regressions tied to a triage of type ci-infra or product-infra. 
 
+## Setup
+
+Install [APM](https://microsoft.github.io/apm/) and then install the required skills:
+
+```bash
+apm install --target claude
+```
+
 ## The Process
 
 1. During buildup to final RC, we already have a good idea of what bugs are suitable for SBAR (sbar-candidate label) and which feel too risky. This is communicated to the relevant teams and release management as early as possible.
