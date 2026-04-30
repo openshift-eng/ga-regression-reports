@@ -136,6 +136,20 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    If the file does not exist, silently skip the comparison — do not warn the user.
 
+   **Prior Release SBAR Follow-up**: If the prior release report was found, parse the Triaged Bugs table to identify all bugs that had an SBAR status of Approved, Candidate, or Linked. For each of these bugs, fetch the current JIRA issue details using `fetch_jira_issue.py` (same as step 12). For each bug, determine:
+
+   - **Bug status**: Current JIRA status (e.g., Closed, Verified, ON_QA, Assigned, New)
+   - **Bug resolution**: Resolution field if closed (e.g., Fixed, Won't Fix, Duplicate)
+   - **Bug closed date**: When the bug was moved to a terminal status, if applicable
+   - **Regression triage record status**: Re-fetch the regressions for the prior release view (`<prior_release>-main`) and check whether the triage records referencing this bug have been closed. A triage record is considered closed when the regression it is attached to has a non-null `closed` timestamp.
+
+   Classify each prior SBAR bug into one of:
+   - **Resolved**: Bug is closed/verified AND all associated triage records are closed
+   - **Bug Open**: The JIRA bug is still in a non-terminal status — this is a **serious concern**
+   - **Triage Open**: The bug may be closed but the Component Readiness triage record is still open — this is a **serious concern**
+
+   Failing to fix an SBAR'd issue within an entire subsequent release cycle is considered a serious failing and must be prominently highlighted in the report.
+
 15. **Generate Report**: Build a markdown report with the following sections. The report should be self-contained and readable without additional context, since it will be committed to git for historical comparison across releases.
 
    **Title**: `# OpenShift <release> GA Regression Report`
@@ -163,6 +177,10 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | Avg Time to Resolve | ... | ... | +/- N% |
    | Regressions Open at GA | ... | ... | +/- N% |
    | Triage % at GA | ... | ... | +/- N% |
+   | SBARs at GA | ... | ... | +/- N% |
+   | SBARs per 100 Jobs | ... | ... | +/- N% |
+
+   Compute "SBARs per 100 Jobs" as `(SBAR count / Qualified Jobs) * 100` for both releases. If the current release's SBARs-per-100-jobs ratio is more than 25% higher than the prior release, add a bold callout paragraph after the table noting that the SBAR rate relative to job coverage has increased significantly. This may indicate growing product quality risk, or it may reflect expanded test coverage surfacing more real issues — flag it for investigation either way.
 
    **Regressions Open at GA**
    - Release and GA date
@@ -182,6 +200,13 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    **Untriaged Regressions**
    - Table with regression ID, component, test name, variants, opened date, days open at GA, and current status (still open or closed date)
 
+   **Prior Release SBAR Follow-up** (only if prior release report was found and had SBAR bugs)
+   - Header noting this section tracks whether SBAR'd issues from the prior release were actually resolved
+   - Table with columns: key (markdown link), title, SBAR status (from prior release), bug status (current), bug resolution, bug closed date, triage record status (open/closed), and an alert column
+   - Any bug that is still open or has an open triage record should be marked with a prominent warning (e.g., "**UNRESOLVED**") in the alert column
+   - After the table, include a summary count: how many prior SBAR bugs are fully resolved vs. how many remain unresolved
+   - If any are unresolved, add a bold callout paragraph emphasizing that failing to resolve an SBAR'd regression within a full release cycle is a serious concern requiring immediate attention
+
    Format the report for easy reading with markdown tables.
 
 16. **Write Report to File**: Write the markdown report to a file named `openshift/<release>-ga-regression-report.md` (in the `openshift/` subdirectory of the repository root). Inform the user of the file path.
@@ -197,6 +222,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 - **Key sections**:
   - Release lifecycle summary (total regressions, unique bugs, avg triage/resolve times)
   - Comparison with prior release (if prior report found in `openshift/` subdirectory)
+  - Prior release SBAR follow-up with unresolved issue alerts
   - Regressions open at GA with filtering details
   - Triaged bug list with links and SBAR status
   - Untriaged regression details
