@@ -194,7 +194,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - SBAR coverage: how many triaged bugs have an SBAR (approved, candidate, or linked)
 
    **Triaged Bugs**
-   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, release note (Y/N), and how many regressions each covers
+   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, release note (Y/N), how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the GA date — this highlights how long the team had to fix the issue before shipping
    - The SBAR status column text (Approved/Candidate/Linked) should be a markdown link to the SBAR Google Doc when available. Show "None" as plain text when no SBAR exists.
 
    **Untriaged Regressions**
