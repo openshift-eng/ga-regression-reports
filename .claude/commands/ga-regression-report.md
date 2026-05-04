@@ -49,11 +49,12 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    From the summary, extract:
    - `summary.total`: Total regressions across the release lifecycle
-   - `summary.triaged`: Number triaged to JIRA bugs
    - `summary.time_to_triage_hrs_avg`: Average hours to triage
    - `summary.time_to_resolve_hrs_avg`: Average hours to resolve
 
    These metrics cover all regressions from development start through the report date, not just those open at GA. This provides context for cross-release comparison.
+
+   **Unique JIRA Bugs (lifecycle)**: Do not use `summary.triaged` for this — it counts triaged regressions, not unique bugs. Instead, use the full regression data from step 6 (which fetches all regressions, not just the `--short` summary). Collect all `triages[].url` values across every regression (open and closed) in the entire view, deduplicate by URL, and count the unique bug URLs. This is the true number of distinct JIRA bugs filed across the release lifecycle.
 
 5. **Fetch Qualified Job Count**: Query the Sippy API to count the number of jobs that qualified for Component Readiness analysis:
 
