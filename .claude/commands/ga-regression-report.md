@@ -1,5 +1,5 @@
 ---
-description: Report regressions open on GA date for a release with triage status breakdown
+description: Report regressions open on a given date (GA or final RC) for a release with triage status breakdown
 argument-hint: <release>
 ---
 
@@ -10,14 +10,14 @@ ci:ga-regression-report
 ## Synopsis
 
 ```
-/ga-regression-report <release> [--min-days <days>]
+/ga-regression-report <release> [--date <YYYY-MM-DD>] [--min-days <days>]
 ```
 
 ## Description
 
 The `ga-regression-report` command generates a markdown report of Component Readiness regressions for a given OpenShift release, intended to be committed to git for historical analysis. By comparing reports across releases, we can track whether regression management is improving or degrading over time.
 
-The report covers regressions that were still open on the GA date, filtering out infrastructure-only regressions (triaged as `ci-infra` or `product-infra`) and short-lived regressions (open fewer than `--min-days` days, default 7). It includes a high-level release lifecycle summary, triaged bug details with SBAR status, triage type validation, and untriaged regression details.
+The report covers regressions that were still open on a specified report date — either a user-provided date (typically the final RC date) or the GA date (the default). It filters out infrastructure-only regressions (triaged as `ci-infra` or `product-infra`) and short-lived regressions (open fewer than `--min-days` days, default 7). It includes a high-level release lifecycle summary, triaged bug details with SBAR status, triage type validation, and untriaged regression details.
 
 The command writes the report to a file, asks the user to review it, and gives them an opportunity to add QSE commentary before finalizing.
 
@@ -27,19 +27,23 @@ The command writes the report to a file, asks the user to review it, and gives t
 
 When calling Python skill scripts via the Bash tool, always run the script directly without piping the output through inline Python (`python3 -c "..."`). Complex piped commands trigger user permission prompts, while simple `python3 script.py args` calls are auto-approved.
 
-1. **Parse Arguments**: Extract the release version from `$1` (e.g., `4.21`). Parse optional `--min-days <days>` flag (default: `7`). This controls the minimum number of days a regression must have been open to be included in the report.
+1. **Parse Arguments**: Extract the release version from `$1` (e.g., `4.21`). Parse optional flags:
+   - `--date <YYYY-MM-DD>`: The report date to evaluate regressions against. If provided, this is used instead of the GA date (typical use: the final RC date). If not provided, the GA date is used as the default.
+   - `--min-days <days>`: Minimum number of days a regression must have been open to be included. Default: `7`.
 
    If no release is provided, prompt the user for one.
 
 2. **Remove Existing Report**: If a file named `<release>-ga-regression-report.md` already exists in the `openshift/` subdirectory of the repository root, delete it before proceeding.
 
-3. **Fetch GA Date**: Use the `get-release-dates` skill to determine the GA date for the release:
+3. **Determine Report Date**: If `--date` was provided, use that as the report date and record the date source as "Final RC" (or whatever context the user provided). Otherwise, use the `get-release-dates` skill to determine the GA date:
 
    ```bash
    release_dates=$(python3 plugins/teams/skills/get-release-dates/get_release_dates.py --release "$1")
    ```
 
-   Extract the `ga` field from the JSON response. If `ga` is null, the release has not yet GA'd — inform the user and stop.
+   Extract the `ga` field from the JSON response. If `ga` is null and no `--date` was provided, the release has not yet GA'd — inform the user and stop. When using the GA date, record the date source as "GA".
+
+   The resulting date and source are referred to as the **report date** throughout the rest of this document.
 
 4. **Fetch Release Lifecycle Summary**: Use the `health-check-regressions` skill to get high-level regression metrics across the entire release lifecycle. Run `list_regressions.py` with the `--short` flag to get only summary statistics:
 
@@ -52,7 +56,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - `summary.time_to_triage_hrs_avg`: Average hours to triage
    - `summary.time_to_resolve_hrs_avg`: Average hours to resolve
 
-   These metrics cover all regressions from development start through the report date, not just those open at GA. This provides context for cross-release comparison.
+   These metrics cover all regressions from development start through today, not just those open on the report date. This provides context for cross-release comparison.
 
    **Unique JIRA Bugs (lifecycle)**: Do not use `summary.triaged` for this — it counts triaged regressions, not unique bugs. Instead, use the full regression data from step 6 (which fetches all regressions, not just the `--short` summary). Collect all `triages[].url` values across every regression (open and closed) in the entire view, deduplicate by URL, and count the unique bug URLs. This is the true number of distinct JIRA bugs filed across the release lifecycle.
 
@@ -72,16 +76,16 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    This returns a JSON object with `summary` and `components` fields. Collect all regressions from the `open` and `closed` arrays across all components. The script uses the parent regression's `opened` timestamp but the view-specific `closed` timestamp.
 
-7. **Filter Regressions Open on GA Date**: From the full regression list, select regressions that were open on the GA date. A regression was open on GA if:
+7. **Filter Regressions Open on Report Date**: From the full regression list, select regressions that were open on the report date. A regression was open on that date if:
 
-   - `opened <= <ga_date>T23:59:59Z` AND
-   - `closed` is `null` (still open) OR `closed >= <ga_date>T00:00:00Z` (closed after GA)
+   - `opened <= <report_date>T23:59:59Z` AND
+   - `closed` is `null` (still open) OR `closed >= <report_date>T00:00:00Z` (closed after the report date)
 
    The `closed` field is either an ISO timestamp string or `null` (if the regression is still open). Note: `opened` reflects when the regression was first detected globally, while `closed` reflects when it was closed in the main view specifically.
 
 8. **Filter Out Infrastructure Regressions**: Remove any regression where **all** triage entries have a `type` of `ci-infra` or `product-infra`. If a regression has at least one triage with a different type (e.g., `product` or `test`), keep it. Untriaged regressions (empty `triages` array) are kept.
 
-9. **Filter Out Short-Lived Regressions**: Remove regressions that were open for fewer than `--min-days` days (default 7). Calculate the duration as the number of days from `opened` to the earlier of: `closed` (if not null) or the GA date. This filters out transient flakes that resolved quickly.
+9. **Filter Out Short-Lived Regressions**: Remove regressions that were open for fewer than `--min-days` days (default 7). Calculate the duration as the number of days from `opened` to the earlier of: `closed` (if not null) or the report date. This filters out transient flakes that resolved quickly.
 
 10. **Classify Triage Status**: For each remaining regression, check the `triages` array:
 
@@ -121,19 +125,20 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - `variants`: List of affected variants
    - `opened`: When the regression was first detected
    - `closed`: When the regression was closed (if it has been)
-   - **Duration open on GA**: Calculate the number of days from `opened` to the GA date. If still open, also note current duration from `opened` to today.
+   - **Duration open on report date**: Calculate the number of days from `opened` to the report date. If still open, also note current duration from `opened` to today.
 
 14. **Compare with Prior Release** (optional): Compute the prior release version by decrementing the minor version (e.g., `4.21` → `4.20`, `4.22` → `4.21`). If the current release minor version is `0` (e.g., `5.0`), the prior release is the last minor of the previous major (e.g., `4.22`). Look for a file named `<prior_release>-ga-regression-report.md` in the `openshift/` subdirectory of the repository root.
 
-   If found, read the prior report and parse its markdown to extract key metrics from the Release Lifecycle Summary table and Regressions Open at GA section:
+   If found, read the prior report and parse its markdown to extract key metrics from the Release Lifecycle Summary table and Regressions Open on Report Date section:
 
    - Qualified jobs
    - Total regressions (lifecycle)
    - Unique JIRA bugs (lifecycle)
    - Avg time to triage
    - Avg time to resolve
-   - Regressions open at GA (after filtering)
-   - Triage percentage at GA
+   - Regressions open on report date (after filtering)
+   - Untriaged regressions on report date
+   - Triage percentage on report date
 
    If the file does not exist, silently skip the comparison — do not warn the user.
 
@@ -156,10 +161,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    **Title**: `# OpenShift <release> GA Regression Report`
 
    **Release Lifecycle Summary**
-   - A short table summarizing regression activity across the entire release lifecycle (not just GA-open regressions). This enables cross-release comparison:
+   - A short table summarizing regression activity across the entire release lifecycle (not just those open on the report date). This enables cross-release comparison. The first row shows the report date and its source:
 
    | Metric | Value |
    |--------|-------|
+   | Report Date | YYYY-MM-DD (source: GA / Final RC) |
    | Qualified Jobs | (from step 5) |
    | Total Regressions | (from step 4 summary.total) |
    | Unique JIRA Bugs | (from step 4 summary.triaged) |
@@ -176,16 +182,17 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | Unique JIRA Bugs (lifecycle) | ... | ... | +/- N% |
    | Avg Time to Triage | ... | ... | +/- N% |
    | Avg Time to Resolve | ... | ... | +/- N% |
-   | Regressions Open at GA | ... | ... | +/- N% |
-   | Triage % at GA | ... | ... | +/- N% |
-   | SBARs at GA | ... | ... | +/- N% |
+   | Regressions Open | ... | ... | +/- N% |
+   | Untriaged | ... | ... | +/- N |
+   | Triage % | ... | ... | +/- N% |
+   | SBARs | ... | ... | +/- N% |
    | SBARs per 100 Jobs | ... | ... | +/- N% |
 
    Compute "SBARs per 100 Jobs" as `(SBAR count / Qualified Jobs) * 100` for both releases. If the current release's SBARs-per-100-jobs ratio is more than 25% higher than the prior release, add a bold callout paragraph after the table noting that the SBAR rate relative to job coverage has increased significantly. This may indicate growing product quality risk, or it may reflect expanded test coverage surfacing more real issues — flag it for investigation either way.
 
-   **Regressions Open at GA**
-   - Release and GA date
-   - Total regressions open on GA (before filtering)
+   **Regressions Open on Report Date**
+   - Release and report date (with source label)
+   - Total regressions open on report date (before filtering)
    - Excluded: infrastructure-only regressions (ci-infra/product-infra)
    - Excluded: short-lived regressions (open < `--min-days` days)
    - Remaining regressions after filtering
@@ -195,11 +202,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - SBAR coverage: how many triaged bugs have an SBAR (approved, candidate, or linked)
 
    **Triaged Bugs**
-   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, release note (Y/N), how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the GA date — this highlights how long the team had to fix the issue before shipping
+   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, release note (Y/N), how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the report date — this highlights how long the team had to fix the issue before shipping
    - The SBAR status column text (Approved/Candidate/Linked) should be a markdown link to the SBAR Google Doc when available. Show "None" as plain text when no SBAR exists.
 
    **Untriaged Regressions**
-   - Table with regression ID, component, test name, variants, opened date, days open at GA, and current status (still open or closed date)
+   - Table with regression ID, component, test name, variants, opened date, days open on report date, and current status (still open or closed date)
 
    **Prior Release SBAR Follow-up** (only if prior release report was found and had SBAR bugs)
    - Header noting this section tracks whether SBAR'd issues from the prior release were actually resolved
@@ -224,24 +231,29 @@ When calling Python skill scripts via the Bash tool, always run the script direc
   - Release lifecycle summary (total regressions, unique bugs, avg triage/resolve times)
   - Comparison with prior release (if prior report found in `openshift/` subdirectory)
   - Prior release SBAR follow-up with unresolved issue alerts
-  - Regressions open at GA with filtering details
+  - Regressions open on report date with filtering details
   - Triaged bug list with links and SBAR status
   - Untriaged regression details
   - QSE Comments (if provided by the user)
 
 ## Examples
 
-1. **Report for 4.21**:
+1. **Report for 4.21 using GA date**:
    ```
    /ga-regression-report 4.21
    ```
 
-2. **Report for 4.20 with 14-day minimum**:
+2. **Report for 4.22 using final RC date**:
+   ```
+   /ga-regression-report 4.22 --date 2026-06-15
+   ```
+
+3. **Report for 4.20 with 14-day minimum**:
    ```
    /ga-regression-report 4.20 --min-days 14
    ```
 
-3. **Report for 4.20 including all durations**:
+4. **Report for 4.20 including all durations**:
    ```
    /ga-regression-report 4.20 --min-days 0
    ```
@@ -249,6 +261,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 ## Arguments
 
 - `$1` (required): OpenShift release version (e.g., `4.21`, `4.20`)
+- `--date <YYYY-MM-DD>` (optional): Report date to evaluate regressions against. Typically the final RC date. If not provided, the GA date is used.
 - `--min-days <days>` (optional): Minimum number of days a regression must have been open to be included. Default: `7`
 
 ## Prerequisites
