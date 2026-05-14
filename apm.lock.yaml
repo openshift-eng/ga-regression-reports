@@ -1,16 +1,17 @@
 lockfile_version: '1'
-generated_at: '2026-04-30T11:25:00.945042+00:00'
-apm_version: 0.11.0
+generated_at: '2026-05-14T12:18:56.923169+00:00'
+apm_version: 0.13.0
 dependencies:
 - repo_url: openshift-eng/ai-helpers
   host: github.com
-  resolved_commit: d9a0875088c7684f8c965d943c983a11de21253c
+  resolved_commit: 25507359bdebd3d21db3228738a5d8f9bd8831a2
   resolved_ref: main
   virtual_path: plugins/ci
   is_virtual: true
   package_type: marketplace_plugin
   deployed_files:
   - .claude/agents/step-registry-analyzer.md
+  - .claude/agents/test-porter.md
   - .claude/commands/add-debug-wait.md
   - .claude/commands/analyze-disruption.md
   - .claude/commands/analyze-payload.md
@@ -36,6 +37,7 @@ dependencies:
   - .claude/commands/trigger-periodic.md
   - .claude/commands/trigger-postsubmit.md
   - .claude/commands/trigger-presubmit.md
+  - .claude/skills/add-jira-triage-link
   - .claude/skills/analyze-disruption
   - .claude/skills/analyze-payload
   - .claude/skills/fetch-jira-issue
@@ -65,6 +67,7 @@ dependencies:
   - .claude/skills/trigger-payload-job
   deployed_file_hashes:
     .claude/agents/step-registry-analyzer.md: sha256:b931752fbd9cd399274f510d6d83e6993faf654383a1dca1d7f8e1b1b33ed45b
+    .claude/agents/test-porter.md: sha256:198b319527f6ff7444b99be8a76061604e65e1afc2403b3c18a427eab8ffbf7a
     .claude/commands/add-debug-wait.md: sha256:8c4a2bdaa074fa09538c1e43a4e4fc26efaf1bb72e4d006cb1cb8d747658b422
     .claude/commands/analyze-disruption.md: sha256:bbf917c73cc20d3f965330ab7cd6e9cc0c4020136ba7855cd4d8a7ede27174cc
     .claude/commands/analyze-payload.md: sha256:defef15762769482f9bc17f14f6f94b77ec14187b8c2211ddc886f007fac0ce7
@@ -72,7 +75,7 @@ dependencies:
     .claude/commands/analyze-prow-job-install-failure.md: sha256:7290a852f884d6203d4fe4f10f5cf5a7a77f99f5335155c3eb7d4135c1926675
     .claude/commands/analyze-prow-job-resource.md: sha256:98bd4f93d5b1a9d5fa319b4436757f4e691057e64b397726fe59a0d6c331c6fb
     .claude/commands/analyze-prow-job-test-failure.md: sha256:3505f2e61a9f6967d6b9224abbd6286b862ea0d3efb4904ce867cda05d7dbcb2
-    .claude/commands/analyze-regression.md: sha256:735d22d0bbb5b0857fe2b934dcc62c40692daa28e7f71f113b1111868a6b5da1
+    .claude/commands/analyze-regression.md: sha256:c40cc9586e9eca1c10154122823e1cbe8a0624b04a6780da40996b957a2c2804
     .claude/commands/ask-sippy.md: sha256:272023d87747c2dbc84a7c114be0ed5e0b91eb8de3524238d8df44e2636fff5d
     .claude/commands/check-if-jira-regression-is-ongoing.md: sha256:d35dd9a3da3dfbbadcd6e965c2354c3475ec2dc4a21ab038df9c8c67ba5a60a6
     .claude/commands/continue-session.md: sha256:29f3c2e3a37fe47b68cb8cb96259d7f37eeb911bef61da2f1d22b57e330c7736
@@ -90,10 +93,10 @@ dependencies:
     .claude/commands/trigger-periodic.md: sha256:44fce4b6e9db3a31c355f670681e4d4f80a0e9750a4c71759173c78b2a55949b
     .claude/commands/trigger-postsubmit.md: sha256:25d941b3db9b2042d31ce0acac967b923fbd152d95fb8d120e7e0a4623be346b
     .claude/commands/trigger-presubmit.md: sha256:e424baca0c7355e94138f4040155324b5a7ac30abf6fde83772e909364710f3b
-  content_hash: sha256:0c9a8e3a04a43b08f6d2ce092b2dff83a36f6554e5697cef3d37fec4ca4146fc
+  content_hash: sha256:25fe02d99a08ce007e3771f3b605e22c8813438fd5e519c170201ecd23c3df47
 - repo_url: openshift-eng/ai-helpers
   host: github.com
-  resolved_commit: d9a0875088c7684f8c965d943c983a11de21253c
+  resolved_commit: 25507359bdebd3d21db3228738a5d8f9bd8831a2
   resolved_ref: main
   virtual_path: plugins/teams
   is_virtual: true
@@ -127,10 +130,10 @@ dependencies:
     .claude/commands/coderabbit-inheritance-scanner.md: sha256:22d3b0619011c5326bafe6d729eb44ca66492343a9c9aee26e37b28f9959c058
     .claude/commands/coderabbit-rules-from-pr-reviews.md: sha256:e3d625003cac22408fc0a11ff152a7765ea31c1a25eca90577dffdfc6fa884f0
     .claude/commands/health-check-jiras.md: sha256:6f08f3787de4a36946e7b16ff4359a02eec6a3511da60fef052a50f13ded637b
-    .claude/commands/health-check-regressions.md: sha256:0c2414f86db9815df6dc73caf187fab1af0d13d262e2c561e433dbceae622efc
+    .claude/commands/health-check-regressions.md: sha256:794e6c513764ec993ebe3ecbbc0a228d717b747a9a6b1127af0b7ad2d2feb0ec
     .claude/commands/health-check.md: sha256:97bed16c844c12b54ba7e44fac064e018a12c091af36f6c7a094c33a528f4a95
     .claude/commands/list-components.md: sha256:e87087cc5c2888dfde29d7706df5e35e555d47c6dfc928cb360e99dd96c5f004
     .claude/commands/list-jiras.md: sha256:4ab0bf9f08adf00bc5d7892a47bb64a75ff694088c53d98dcfb7d079e552c6f5
-    .claude/commands/list-regressions.md: sha256:ba38e7ebe28409b60476ee5b9c841f5af4fdf7666fd6b94ad957f108b5c6ce17
+    .claude/commands/list-regressions.md: sha256:c9ddd10a7e6a321613565c38f58874283225892cb6e8a26515433fa4c2949966
     .claude/commands/list-teams.md: sha256:b004ef72ffc006855e5af3749cb17d3748470eb0b556eb0d17df21bd619635f2
-  content_hash: sha256:ef98ad5b140ee352b2943539e6a5b49893bf86b1fd355c46a0eef8b054025a39
+  content_hash: sha256:526a7de901df135c759d88b50ba468fe02ccf03aadd68f65d8c3e1bac7f90a41
