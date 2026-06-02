@@ -29,6 +29,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
 1. **Parse Arguments**: Extract the release version from `$1` (e.g., `4.21`). Parse optional flags:
    - `--date <YYYY-MM-DD>`: The report date to evaluate regressions against. If provided, this is used instead of the GA date (typical use: the final RC date). If not provided, the GA date is used as the default.
+
    - `--min-days <days>`: Minimum number of days a regression must have been open to be included. Default: `7`.
 
    If no release is provided, prompt the user for one.
@@ -58,6 +59,8 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    These metrics cover all regressions from development start through today, not just those open on the report date. This provides context for cross-release comparison.
 
+   **Note**: The `--short` summary only provides average and max timing values, not percentiles. P50 and P95 time to triage and time to resolve must be computed from the individual regression data fetched in step 6. See step 6 for the computation method.
+
    **Unique JIRA Bugs (lifecycle)**: Do not use `summary.triaged` for this — it counts triaged regressions, not unique bugs. Instead, use the full regression data from step 6 (which fetches all regressions, not just the `--short` summary). Collect all `triages[].url` values across every regression (open and closed) in the entire view, deduplicate by URL, and count the unique bug URLs. This is the true number of distinct JIRA bugs filed across the release lifecycle.
 
 5. **Fetch Qualified Job Count**: Query the Sippy API to count the number of jobs that qualified for Component Readiness analysis:
@@ -75,6 +78,13 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    ```
 
    This returns a JSON object with `summary` and `components` fields. Collect all regressions from the `open` and `closed` arrays across all components. The script uses the parent regression's `opened` timestamp but the view-specific `closed` timestamp.
+
+   **Compute P50 and P95 Timing Metrics**: Using the individual regression data, compute P50 (median) and P95 (95th percentile) values for time to triage and time to resolve. P50 shows the typical experience while P95 reduces the influence of extreme outliers. Together with the average, they give a fuller picture of triage and resolution performance.
+
+   - **Time to Triage**: For each triaged regression (non-empty `triages` array), compute time to triage as the difference between the earliest `triages[].created_at` timestamp and the regression's `opened` timestamp, in hours. Collect all values, sort them, and take P50 at `sorted_values[int(len(sorted_values) * 0.50)]` and P95 at `sorted_values[int(len(sorted_values) * 0.95)]`.
+   - **Time to Resolve**: For each closed regression (non-null `closed` field), compute time to resolve as the difference between `closed` and `opened`, in hours. Collect all values, sort them, and take P50 and P95 at the same percentile indices.
+
+   Convert the resulting hours to days for display (divide by 24, round to one decimal place). These percentile values are used alongside the averages in the Release Lifecycle Summary and Comparison tables.
 
 7. **Filter Regressions Open on Report Date**: From the full regression list, select regressions that were open on the report date. A regression was open on that date if:
 
@@ -117,7 +127,27 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - **Linked**: no SBAR label but a comment references an SBAR with a Google Docs link
    - **None**: no SBAR evidence found
 
-13. **Compute Untriaged Regression Details**: For each untriaged regression, gather:
+13. **Fetch JIRA SBAR Exceptions**: Query the JIRA API for bugs with SBAR labels that affect this release but may not have been statistically showing as Component Readiness regressions on the report date. These represent issues the team identified and escalated during the release cycle that aren't captured by the CR regression data alone.
+
+   Use the JIRA v3 `search/jql` endpoint (POST to `https://redhat.atlassian.net/rest/api/3/search/jql`) with the following JQL:
+
+   ```
+   project = OCPBUGS AND labels in ("sbar-approved", "sbar-candidate") AND affectedVersion = "<release>" AND statusCategory != Done
+   ```
+
+   The `statusCategory != Done` filter approximates "open on the report date" — bugs closed before the report date would already be in a Done status category. Request fields: `key`, `summary`, `status`, `labels`, `fixVersions`, `resolution`.
+
+   For each returned bug:
+
+   - **Cross-reference with Component Readiness triage records**: Check the full regression data (already fetched in step 6) for any triage records whose `url` contains this bug's key. If triage records exist, check their `type` field. Exclude the bug if **all** associated triage records have a type of `ci-infra` or `product-infra` (same infrastructure filter as step 8). Bugs with no triage records in CR data are kept — they represent JIRA-only SBAR exceptions.
+
+   - **Exclude bugs already in the Triaged Bugs table**: If the bug key already appears in the unique bugs collected in step 11, skip it — it's already covered by the main regression analysis.
+
+   The remaining bugs are "Additional SBAR Exceptions." Extract each bug's SBAR status from its labels (`sbar-approved` → Approved, `sbar-candidate` → Candidate).
+
+   **Linking convention**: Every JIRA bug key mentioned anywhere in the report — including in exclusion notes, footnotes, and prose — must be a markdown link to the bug URL (e.g., `[OCPBUGS-12345](https://redhat.atlassian.net/browse/OCPBUGS-12345)`). Never render a bare bug key.
+
+14. **Compute Untriaged Regression Details**: For each untriaged regression, gather:
 
    - `id`: Regression ID
    - `component`: Component name
@@ -127,7 +157,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - `closed`: When the regression was closed (if it has been)
    - **Duration open on report date**: Calculate the number of days from `opened` to the report date. If still open, also note current duration from `opened` to today.
 
-14. **Compare with Prior Release** (optional): Compute the prior release version by decrementing the minor version (e.g., `4.21` → `4.20`, `4.22` → `4.21`). If the current release minor version is `0` (e.g., `5.0`), the prior release is the last minor of the previous major (e.g., `4.22`). Look for a file named `<prior_release>-ga-regression-report.md` in the `openshift/` subdirectory of the repository root.
+15. **Compare with Prior Release** (optional): Compute the prior release version by decrementing the minor version (e.g., `4.21` → `4.20`, `4.22` → `4.21`). If the current release minor version is `0` (e.g., `5.0`), the prior release is the last minor of the previous major (e.g., `4.22`). Look for a file named `<prior_release>-ga-regression-report.md` in the `openshift/` subdirectory of the repository root.
 
    If found, read the prior report and parse its markdown to extract key metrics from the Release Lifecycle Summary table and Regressions Open on Report Date section:
 
@@ -135,7 +165,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - Total regressions (lifecycle)
    - Unique JIRA bugs (lifecycle)
    - Avg time to triage
+   - P50 time to triage
+   - P95 time to triage
    - Avg time to resolve
+   - P50 time to resolve
+   - P95 time to resolve
    - Regressions open on report date (after filtering)
    - Untriaged regressions on report date
    - Triage percentage on report date
@@ -156,7 +190,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    Failing to fix an SBAR'd issue within an entire subsequent release cycle is considered a serious failing and must be prominently highlighted in the report.
 
-15. **Generate Report**: Build a markdown report with the following sections. The report should be self-contained and readable without additional context, since it will be committed to git for historical comparison across releases.
+16. **Generate Report**: Build a markdown report with the following sections. The report should be self-contained and readable without additional context, since it will be committed to git for historical comparison across releases.
 
    **Title**: `# OpenShift <release> GA Regression Report`
 
@@ -170,7 +204,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | Total Regressions | (from step 4 summary.total) |
    | Unique JIRA Bugs | (from step 4 summary.triaged) |
    | Avg Time to Triage | (from step 4 summary.time_to_triage_hrs_avg, converted to days) |
+   | P50 Time to Triage | (from step 6 P50 computation, converted to days) |
+   | P95 Time to Triage | (from step 6 P95 computation, converted to days) |
    | Avg Time to Resolve | (from step 4 summary.time_to_resolve_hrs_avg, converted to days) |
+   | P50 Time to Resolve | (from step 6 P50 computation, converted to days) |
+   | P95 Time to Resolve | (from step 6 P95 computation, converted to days) |
 
    **Comparison with Prior Release** (only if prior release report was found)
    - A table comparing key metrics between the current and prior release side by side, with a delta column showing improvement or regression:
@@ -181,7 +219,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | Total Regressions (lifecycle) | ... | ... | +/- N% |
    | Unique JIRA Bugs (lifecycle) | ... | ... | +/- N% |
    | Avg Time to Triage | ... | ... | +/- N% |
+   | P50 Time to Triage | ... | ... | +/- N% |
+   | P95 Time to Triage | ... | ... | +/- N% |
    | Avg Time to Resolve | ... | ... | +/- N% |
+   | P50 Time to Resolve | ... | ... | +/- N% |
+   | P95 Time to Resolve | ... | ... | +/- N% |
    | Regressions Open | ... | ... | +/- N% |
    | Untriaged | ... | ... | +/- N |
    | Triage % | ... | ... | +/- N% |
@@ -208,6 +250,13 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    **Untriaged Regressions**
    - Table with regression ID, component, test name, variants, opened date, days open on report date, and current status (still open or closed date)
 
+   **Additional SBAR Exceptions** (only if step 13 found any)
+   - Introductory text: "The following bugs have SBAR labels and `affectedVersion` matching this release but were not statistically showing as Component Readiness regressions on the report date. These represent issues identified and escalated during the release cycle that were either resolved before the report date, intermittent, or not covered by the CR statistical model."
+   - Table with columns: Bug (linked key), Title, Status, SBAR Status, Fix Versions
+   - If no additional SBAR exceptions were found (after filtering), omit this section entirely.
+   - After the table (and any exclusion notes), include a bold summary line: **Total SBARs for <release>: N** (X from triaged regressions + Y additional exceptions), with a comparison to the prior release total if the prior report was found (e.g., "down from M in <prior_release> (-Z%)").
+   - The SBARs and SBARs per 100 Jobs rows in the Comparison with Prior Release table should reflect the **total** SBAR count: bugs with SBAR status from the Triaged Bugs table **plus** any Additional SBAR Exceptions. This gives a complete picture of SBAR activity for the release.
+
    **Prior Release SBAR Follow-up** (only if prior release report was found and had SBAR bugs)
    - Header noting this section tracks whether SBAR'd issues from the prior release were actually resolved
    - Table with columns: key (markdown link), title, SBAR status (from prior release), bug status (current), bug resolution, bug closed date, triage record status (open/closed), and an alert column
@@ -217,23 +266,24 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    Format the report for easy reading with markdown tables.
 
-16. **Write Report to File**: Write the markdown report to a file named `openshift/<release>-ga-regression-report.md` (in the `openshift/` subdirectory of the repository root). Inform the user of the file path.
+17. **Write Report to File**: Write the markdown report to a file named `openshift/<release>-ga-regression-report.md` (in the `openshift/` subdirectory of the repository root). Inform the user of the file path.
 
-17. **User Review**: Ask the user to review the generated report. Wait for their feedback. If they request changes, apply them and rewrite the file.
+18. **User Review**: Ask the user to review the generated report. Wait for their feedback. If they request changes, apply them and rewrite the file.
 
-18. **QSE Comments**: After the user approves the report, ask if they have any additional commentary they would like to add. If they do, append a `## QSE Comments` section at the end of the file with their comments. If they have no comments, leave the report as-is.
+19. **QSE Comments**: After the user approves the report, ask if they have any additional commentary they would like to add. If they do, append a `## QSE Comments` section at the end of the file with their comments. If they have no comments, leave the report as-is.
 
 ## Return Value
 
 - **Output file**: `openshift/<release>-ga-regression-report.md` in the repository root
 - **Format**: Markdown report suitable for committing to git for historical analysis
 - **Key sections**:
-  - Release lifecycle summary (total regressions, unique bugs, avg triage/resolve times)
+  - Release lifecycle summary (total regressions, unique bugs, avg/P50/P95 triage/resolve times)
   - Comparison with prior release (if prior report found in `openshift/` subdirectory)
   - Prior release SBAR follow-up with unresolved issue alerts
   - Regressions open on report date with filtering details
   - Triaged bug list with links and SBAR status
   - Untriaged regression details
+  - Additional SBAR exceptions (JIRA bugs with SBAR labels affecting the release but not statistically showing in CR on the report date)
   - QSE Comments (if provided by the user)
 
 ## Examples
