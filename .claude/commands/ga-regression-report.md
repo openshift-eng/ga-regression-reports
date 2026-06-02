@@ -63,7 +63,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    **Unique JIRA Bugs (lifecycle)**: Do not use `summary.triaged` for this — it counts triaged regressions, not unique bugs. Instead, use the full regression data from step 6 (which fetches all regressions, not just the `--short` summary). Collect all `triages[].url` values across every regression (open and closed) in the entire view, deduplicate by URL, and count the unique bug URLs. This is the true number of distinct JIRA bugs filed across the release lifecycle.
 
-5. **Fetch Qualified Job Count**: Query the Sippy API to count the number of jobs that qualified for Component Readiness analysis:
+5. **Fetch Jobs Covered Count**: Query the Sippy API to count the number of jobs that qualified for Component Readiness analysis:
 
    ```bash
    curl -s 'https://sippy-auth.dptools.openshift.org/api/jobs?release=<release>&filter={"items":[{"columnField":"variants","operatorValue":"has entry","value":"JobTier:standard"},{"columnField":"variants","operatorValue":"has entry","value":"JobTier:informing"},{"columnField":"variants","operatorValue":"has entry","value":"JobTier:blocking"}],"linkOperator":"or"}&period=default&sortField=net_improvement&sort=asc'
@@ -114,7 +114,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    python3 "$script_path" "<jira_key>" --format json
    ```
 
-   Extract the `summary` and `release_note_type` fields from each response. A bug has a release note if `release_note_type` is anything other than `"Release Note Not Required"` or `null`. If JIRA credentials are not set, display the bug keys and URLs without titles.
+   Extract the `summary` field from each response. If JIRA credentials are not set, display the bug keys and URLs without titles.
 
    **SBAR Detection**: For each bug, check for evidence of an SBAR (Situation-Background-Assessment-Recommendation) document:
 
@@ -161,7 +161,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    If found, read the prior report and parse its markdown to extract key metrics from the Release Lifecycle Summary table and Regressions Open on Report Date section:
 
-   - Qualified jobs
+   - Jobs covered
    - Total regressions (lifecycle)
    - Unique JIRA bugs (lifecycle)
    - Avg time to triage
@@ -200,7 +200,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | Metric | Value |
    |--------|-------|
    | Report Date | YYYY-MM-DD (source: GA / Final RC) |
-   | Qualified Jobs | (from step 5) |
+   | Jobs Covered | (from step 5) |
    | Total Regressions | (from step 4 summary.total) |
    | Unique JIRA Bugs | (from step 4 summary.triaged) |
    | Avg Time to Triage | (from step 4 summary.time_to_triage_hrs_avg, converted to days) |
@@ -215,7 +215,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    | Metric | Prior (X.Y) | Current (X.Z) | Delta |
    |--------|-------------|---------------|-------|
-   | Qualified Jobs | ... | ... | +/- N% |
+   | Jobs Covered | ... | ... | +/- N% |
    | Total Regressions (lifecycle) | ... | ... | +/- N% |
    | Unique JIRA Bugs (lifecycle) | ... | ... | +/- N% |
    | Avg Time to Triage | ... | ... | +/- N% |
@@ -230,7 +230,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    | SBARs | ... | ... | +/- N% |
    | SBARs per 100 Jobs | ... | ... | +/- N% |
 
-   Compute "SBARs per 100 Jobs" as `(SBAR count / Qualified Jobs) * 100` for both releases. If the current release's SBARs-per-100-jobs ratio is more than 25% higher than the prior release, add a bold callout paragraph after the table noting that the SBAR rate relative to job coverage has increased significantly. This may indicate growing product quality risk, or it may reflect expanded test coverage surfacing more real issues — flag it for investigation either way.
+   Compute "SBARs per 100 Jobs" as `(SBAR count / Jobs Covered) * 100` for both releases. If the current release's SBARs-per-100-jobs ratio is more than 25% higher than the prior release, add a bold callout paragraph after the table noting that the SBAR rate relative to job coverage has increased significantly. This may indicate growing product quality risk, or it may reflect expanded test coverage surfacing more real issues — flag it for investigation either way.
 
    **Regressions Open on Report Date**
    - Release and report date (with source label)
@@ -244,7 +244,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - SBAR coverage: how many triaged bugs have an SBAR (approved, candidate, or linked)
 
    **Triaged Bugs**
-   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, release note (Y/N), how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the report date — this highlights how long the team had to fix the issue before shipping
+   - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the report date — this highlights how long the team had to fix the issue before shipping
    - The SBAR status column text (Approved/Candidate/Linked) should be a markdown link to the SBAR Google Doc when available. Show "None" as plain text when no SBAR exists.
 
    **Untriaged Regressions**
@@ -252,14 +252,14 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    **Additional SBAR Exceptions** (only if step 13 found any)
    - Introductory text: "The following bugs have SBAR labels and `affectedVersion` matching this release but were not statistically showing as Component Readiness regressions on the report date. These represent issues identified and escalated during the release cycle that were either resolved before the report date, intermittent, or not covered by the CR statistical model."
-   - Table with columns: Bug (linked key), Title, Status, SBAR Status, Fix Versions
+   - Table with columns: Bug (linked key), Title, Status, SBAR Status
    - If no additional SBAR exceptions were found (after filtering), omit this section entirely.
    - After the table (and any exclusion notes), include a bold summary line: **Total SBARs for <release>: N** (X from triaged regressions + Y additional exceptions), with a comparison to the prior release total if the prior report was found (e.g., "down from M in <prior_release> (-Z%)").
    - The SBARs and SBARs per 100 Jobs rows in the Comparison with Prior Release table should reflect the **total** SBAR count: bugs with SBAR status from the Triaged Bugs table **plus** any Additional SBAR Exceptions. This gives a complete picture of SBAR activity for the release.
 
    **Prior Release SBAR Follow-up** (only if prior release report was found and had SBAR bugs)
    - Header noting this section tracks whether SBAR'd issues from the prior release were actually resolved
-   - Table with columns: key (markdown link), title, SBAR status (from prior release), bug status (current), bug resolution, bug closed date, triage record status (open/closed), and an alert column
+   - Table with columns: key (markdown link), title, SBAR status (from prior release), bug status (current), triage record status (open/closed), and an alert column
    - Any bug that is still open or has an open triage record should be marked with a prominent warning (e.g., "**UNRESOLVED**") in the alert column
    - After the table, include a summary count: how many prior SBAR bugs are fully resolved vs. how many remain unresolved
    - If any are unresolved, add a bold callout paragraph emphasizing that failing to resolve an SBAR'd regression within a full release cycle is a serious concern requiring immediate attention
