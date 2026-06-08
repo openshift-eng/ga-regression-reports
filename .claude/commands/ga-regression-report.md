@@ -17,7 +17,7 @@ ci:ga-regression-report
 
 The `ga-regression-report` command generates a markdown report of Component Readiness regressions for a given OpenShift release, intended to be committed to git for historical analysis. By comparing reports across releases, we can track whether regression management is improving or degrading over time.
 
-The report covers regressions that were still open on a specified report date — either a user-provided date (typically the final RC date) or the GA date (the default). It filters out infrastructure-only regressions (triaged as `ci-infra` or `product-infra`) and short-lived regressions (open fewer than `--min-days` days, default 7). It includes a high-level release lifecycle summary, triaged bug details with SBAR status, triage type validation, and untriaged regression details.
+The report covers regressions that were still open on a specified report date — either a user-provided date (typically the final RC date) or the GA date (the default). It filters out infrastructure-only regressions (triaged as `ci-infra` or `product-infra`) and short-lived regressions (open fewer than `--min-days` days, default 7). It includes a high-level release lifecycle summary, triaged bug details with SBAR status, triage type validation, and untriaged regression details. The report explicitly validates that every regression remaining after filtering is attributed to a JIRA bug with an approved SBAR, and prominently flags any gaps.
 
 The command writes the report to a file, asks the user to review it, and gives them an opportunity to add QSE commentary before finalizing.
 
@@ -127,7 +127,15 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - **Linked**: no SBAR label but a comment references an SBAR with a Google Docs link
    - **None**: no SBAR evidence found
 
-13. **Fetch JIRA SBAR Exceptions**: Query the JIRA API for bugs with SBAR labels that affect this release but may not have been statistically showing as Component Readiness regressions on the report date. These represent issues the team identified and escalated during the release cycle that aren't captured by the CR regression data alone.
+13. **Validate SBAR Compliance**: After classifying SBAR status for each bug, check that every remaining regression (after filtering in steps 8–9) is attributed to a JIRA bug with an **approved** SBAR. A regression is **compliant** if it is triaged and at least one of its associated bugs has `sbar-approved` status. A regression is **non-compliant** if any of the following are true:
+
+   - **Untriaged**: The regression has no triage entries and therefore no JIRA attribution at all.
+   - **No SBAR**: The regression is triaged but the bug has SBAR status None — no SBAR evidence exists.
+   - **SBAR not approved**: The regression is triaged but the bug's SBAR status is only Candidate or Linked — the SBAR has not been approved.
+
+   Record compliance status for each unique bug and each regression. Compute an overall compliance verdict: **PASS** if every remaining regression is compliant, **FAIL** otherwise.
+
+14. **Fetch JIRA SBAR Exceptions**: Query the JIRA API for bugs with SBAR labels that affect this release but may not have been statistically showing as Component Readiness regressions on the report date. These represent issues the team identified and escalated during the release cycle that aren't captured by the CR regression data alone.
 
    Use the JIRA v3 `search/jql` endpoint (POST to `https://redhat.atlassian.net/rest/api/3/search/jql`) with the following JQL:
 
@@ -147,7 +155,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    **Linking convention**: Every JIRA bug key mentioned anywhere in the report — including in exclusion notes, footnotes, and prose — must be a markdown link to the bug URL (e.g., `[OCPBUGS-12345](https://redhat.atlassian.net/browse/OCPBUGS-12345)`). Never render a bare bug key.
 
-14. **Compute Untriaged Regression Details**: For each untriaged regression, gather:
+15. **Compute Untriaged Regression Details**: For each untriaged regression, gather:
 
    - `id`: Regression ID
    - `component`: Component name
@@ -157,7 +165,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - `closed`: When the regression was closed (if it has been)
    - **Duration open on report date**: Calculate the number of days from `opened` to the report date. If still open, also note current duration from `opened` to today.
 
-15. **Compare with Prior Release** (optional): Compute the prior release version by decrementing the minor version (e.g., `4.21` → `4.20`, `4.22` → `4.21`). If the current release minor version is `0` (e.g., `5.0`), the prior release is the last minor of the previous major (e.g., `4.22`). Look for a file named `<prior_release>-ga-regression-report.md` in the `openshift/` subdirectory of the repository root.
+16. **Compare with Prior Release** (optional): Compute the prior release version by decrementing the minor version (e.g., `4.21` → `4.20`, `4.22` → `4.21`). If the current release minor version is `0` (e.g., `5.0`), the prior release is the last minor of the previous major (e.g., `4.22`). Look for a file named `<prior_release>-ga-regression-report.md` in the `openshift/` subdirectory of the repository root.
 
    If found, read the prior report and parse its markdown to extract key metrics from the Release Lifecycle Summary table and Regressions Open on Report Date section:
 
@@ -190,7 +198,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    Failing to fix an SBAR'd issue within an entire subsequent release cycle is considered a serious failing and must be prominently highlighted in the report.
 
-16. **Generate Report**: Build a markdown report with the following sections. The report should be self-contained and readable without additional context, since it will be committed to git for historical comparison across releases.
+17. **Generate Report**: Build a markdown report with the following sections. The report should be self-contained and readable without additional context, since it will be committed to git for historical comparison across releases.
 
    **Title**: `# OpenShift <release> GA Regression Report`
 
@@ -242,15 +250,24 @@ When calling Python skill scripts via the Bash tool, always run the script direc
    - Untriaged count and percentage
    - Number of unique bugs
    - SBAR coverage: how many triaged bugs have an SBAR (approved, candidate, or linked)
+   - SBAR Approved: how many triaged bugs have an **approved** SBAR — display **PASS** if all do, **FAIL** if any do not (including untriaged regressions which lack both triage and SBAR)
 
    **Triaged Bugs**
    - Table of unique JIRA bugs with columns: key (as a markdown link to the bug URL), title, triage type, SBAR status, how many regressions each covers, and for SBAR'd bugs a "Days to Fix" column showing the number of days from when the earliest triage record referencing this bug was created (`opened` timestamp of the regression) to the report date — this highlights how long the team had to fix the issue before shipping
    - The SBAR status column text (Approved/Candidate/Linked) should be a markdown link to the SBAR Google Doc when available. Show "None" as plain text when no SBAR exists.
 
+   **SBAR Compliance**
+   - Display the overall verdict from step 13:
+     - If **PASS**: `**SBAR Compliance: PASS** — All N remaining regressions are attributed to bugs with approved SBARs.`
+     - If **FAIL**: `**SBAR Compliance: FAIL** — X of N remaining regressions lack approved SBAR attribution.`
+   - If FAIL, include a table of non-compliant bugs with columns: Bug (linked key), Title, Current SBAR Status, Gap (what action is needed — e.g., "Needs triage + SBAR", "Needs SBAR", "Needs approval"), Regressions (count of regressions affected by this bug)
+   - Untriaged regressions should also appear in this table with Bug shown as "—" (no bug), Title as the test name, SBAR Status as "—", and Gap as "Needs triage + SBAR"
+   - If FAIL, add a bold callout paragraph: **All regressions remaining after infrastructure and short-lived filters must be attributed to a JIRA bug with an approved SBAR before the release can ship. The gaps listed above require immediate action.**
+
    **Untriaged Regressions**
    - Table with regression ID, component, test name, variants, opened date, days open on report date, and current status (still open or closed date)
 
-   **Additional SBAR Exceptions** (only if step 13 found any)
+   **Additional SBAR Exceptions** (only if step 14 found any)
    - Introductory text: "The following bugs have SBAR labels and `affectedVersion` matching this release but were not statistically showing as Component Readiness regressions on the report date. These represent issues identified and escalated during the release cycle that were either resolved before the report date, intermittent, or not covered by the CR statistical model."
    - Table with columns: Bug (linked key), Title, Status, SBAR Status
    - If no additional SBAR exceptions were found (after filtering), omit this section entirely.
@@ -266,11 +283,11 @@ When calling Python skill scripts via the Bash tool, always run the script direc
 
    Format the report for easy reading with markdown tables.
 
-17. **Write Report to File**: Write the markdown report to a file named `openshift/<release>-ga-regression-report.md` (in the `openshift/` subdirectory of the repository root). Inform the user of the file path.
+18. **Write Report to File**: Write the markdown report to a file named `openshift/<release>-ga-regression-report.md` (in the `openshift/` subdirectory of the repository root). Inform the user of the file path.
 
-18. **User Review**: Ask the user to review the generated report. Wait for their feedback. If they request changes, apply them and rewrite the file.
+19. **User Review**: Ask the user to review the generated report. Wait for their feedback. If they request changes, apply them and rewrite the file.
 
-19. **QSE Comments**: After the user approves the report, ask if they have any additional commentary they would like to add. If they do, append a `## QSE Comments` section at the end of the file with their comments. If they have no comments, leave the report as-is.
+20. **QSE Comments**: After the user approves the report, ask if they have any additional commentary they would like to add. If they do, append a `## QSE Comments` section at the end of the file with their comments. If they have no comments, leave the report as-is.
 
 ## Return Value
 
@@ -282,6 +299,7 @@ When calling Python skill scripts via the Bash tool, always run the script direc
   - Prior release SBAR follow-up with unresolved issue alerts
   - Regressions open on report date with filtering details
   - Triaged bug list with links and SBAR status
+  - SBAR compliance verdict (PASS/FAIL) with non-compliant regression details
   - Untriaged regression details
   - Additional SBAR exceptions (JIRA bugs with SBAR labels affecting the release but not statistically showing in CR on the report date)
   - QSE Comments (if provided by the user)
