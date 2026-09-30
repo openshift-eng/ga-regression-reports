@@ -89,5 +89,5 @@ curl_with_token.sh https://api.your-cluster.example.com:6443 -X GET \
 ## See Also
 
 - [SKILL.md](./SKILL.md) - Detailed skill documentation
-- [CI Plugin README](../../README.md) - Parent plugin documentation
+- [CI Plugin README](../../../apm_modules/ci/README.md) - Parent plugin documentation
 

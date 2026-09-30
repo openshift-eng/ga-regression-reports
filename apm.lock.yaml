@@ -1,6 +1,6 @@
 lockfile_version: '1'
-generated_at: '2026-05-14T12:18:56.923169+00:00'
-apm_version: 0.13.0
+generated_at: '2026-09-30T12:32:06.645776+00:00'
+apm_version: 0.19.0
 dependencies:
 - repo_url: openshift-eng/ai-helpers
   host: github.com
@@ -38,33 +38,99 @@ dependencies:
   - .claude/commands/trigger-postsubmit.md
   - .claude/commands/trigger-presubmit.md
   - .claude/skills/add-jira-triage-link
+  - .claude/skills/add-jira-triage-link/SKILL.md
+  - .claude/skills/add-jira-triage-link/add_jira_triage_link.py
   - .claude/skills/analyze-disruption
+  - .claude/skills/analyze-disruption/SKILL.md
+  - .claude/skills/analyze-disruption/parse_disruption.py
   - .claude/skills/analyze-payload
+  - .claude/skills/analyze-payload/SKILL.md
   - .claude/skills/fetch-jira-issue
+  - .claude/skills/fetch-jira-issue/README.md
+  - .claude/skills/fetch-jira-issue/SKILL.md
+  - .claude/skills/fetch-jira-issue/fetch_jira_issue.py
   - .claude/skills/fetch-job-run-summary
+  - .claude/skills/fetch-job-run-summary/SKILL.md
+  - .claude/skills/fetch-job-run-summary/fetch_job_run_summary.py
   - .claude/skills/fetch-new-prs-in-payload
+  - .claude/skills/fetch-new-prs-in-payload/SKILL.md
+  - .claude/skills/fetch-new-prs-in-payload/fetch_new_prs_in_payload.py
   - .claude/skills/fetch-payloads
+  - .claude/skills/fetch-payloads/SKILL.md
+  - .claude/skills/fetch-payloads/fetch_payloads.py
   - .claude/skills/fetch-prowjob-json
+  - .claude/skills/fetch-prowjob-json/SKILL.md
   - .claude/skills/fetch-regression-details
+  - .claude/skills/fetch-regression-details/README.md
+  - .claude/skills/fetch-regression-details/SKILL.md
+  - .claude/skills/fetch-regression-details/fetch_regression_details.py
   - .claude/skills/fetch-related-triages
+  - .claude/skills/fetch-related-triages/SKILL.md
+  - .claude/skills/fetch-related-triages/fetch_related_triages.py
   - .claude/skills/fetch-releases
+  - .claude/skills/fetch-releases/SKILL.md
+  - .claude/skills/fetch-releases/fetch_releases.py
   - .claude/skills/fetch-test-report
+  - .claude/skills/fetch-test-report/SKILL.md
+  - .claude/skills/fetch-test-report/fetch_test_report.py
   - .claude/skills/fetch-test-runs
+  - .claude/skills/fetch-test-runs/README.md
+  - .claude/skills/fetch-test-runs/SKILL.md
+  - .claude/skills/fetch-test-runs/fetch_test_runs.py
   - .claude/skills/oc-auth
+  - .claude/skills/oc-auth/README.md
+  - .claude/skills/oc-auth/SKILL.md
+  - .claude/skills/oc-auth/curl_with_token.sh
   - .claude/skills/payload-autodl-json
+  - .claude/skills/payload-autodl-json/SKILL.md
   - .claude/skills/payload-experimental-reverts
+  - .claude/skills/payload-experimental-reverts/SKILL.md
   - .claude/skills/payload-results-yaml
+  - .claude/skills/payload-results-yaml/SKILL.md
   - .claude/skills/prow-job-analyze-install-failure
+  - .claude/skills/prow-job-analyze-install-failure/SKILL.md
   - .claude/skills/prow-job-analyze-metal-install-failure
+  - .claude/skills/prow-job-analyze-metal-install-failure/SKILL.md
   - .claude/skills/prow-job-analyze-resource
+  - .claude/skills/prow-job-analyze-resource/CHANGELOG.md
+  - .claude/skills/prow-job-analyze-resource/README.md
+  - .claude/skills/prow-job-analyze-resource/SCRIPTS.md
+  - .claude/skills/prow-job-analyze-resource/SKILL.md
+  - .claude/skills/prow-job-analyze-resource/create_context_html_files.py
+  - .claude/skills/prow-job-analyze-resource/create_inline_html_files.py
+  - .claude/skills/prow-job-analyze-resource/generate_html_report.py
+  - .claude/skills/prow-job-analyze-resource/generate_report.py
+  - .claude/skills/prow-job-analyze-resource/parse_all_logs.py
+  - .claude/skills/prow-job-analyze-resource/parse_audit_logs.py
+  - .claude/skills/prow-job-analyze-resource/parse_pod_logs.py
+  - .claude/skills/prow-job-analyze-resource/parse_url.py
+  - .claude/skills/prow-job-analyze-resource/prow_job_resource_grep.sh
+  - .claude/skills/prow-job-analyze-resource/report_template.html
   - .claude/skills/prow-job-analyze-test-failure
+  - .claude/skills/prow-job-analyze-test-failure/README.md
+  - .claude/skills/prow-job-analyze-test-failure/SKILL.md
   - .claude/skills/prow-job-artifact-search
+  - .claude/skills/prow-job-artifact-search/SKILL.md
+  - .claude/skills/prow-job-artifact-search/prow_job_artifact_search.py
   - .claude/skills/prow-job-extract-must-gather
+  - .claude/skills/prow-job-extract-must-gather/CHANGELOG.md
+  - .claude/skills/prow-job-extract-must-gather/README.md
+  - .claude/skills/prow-job-extract-must-gather/SKILL.md
+  - .claude/skills/prow-job-extract-must-gather/extract_archives.py
+  - .claude/skills/prow-job-extract-must-gather/generate_html_report.py
   - .claude/skills/revert-pr
+  - .claude/skills/revert-pr/SKILL.md
   - .claude/skills/set-release-blocker
+  - .claude/skills/set-release-blocker/SKILL.md
+  - .claude/skills/set-release-blocker/set_release_blocker.py
   - .claude/skills/stage-payload-reverts
+  - .claude/skills/stage-payload-reverts/SKILL.md
   - .claude/skills/triage-regression
+  - .claude/skills/triage-regression/README.md
+  - .claude/skills/triage-regression/SKILL.md
+  - .claude/skills/triage-regression/triage_regression.py
   - .claude/skills/trigger-payload-job
+  - .claude/skills/trigger-payload-job/SKILL.md
   deployed_file_hashes:
     .claude/agents/step-registry-analyzer.md: sha256:b931752fbd9cd399274f510d6d83e6993faf654383a1dca1d7f8e1b1b33ed45b
     .claude/agents/test-porter.md: sha256:198b319527f6ff7444b99be8a76061604e65e1afc2403b3c18a427eab8ffbf7a
@@ -93,6 +159,72 @@ dependencies:
     .claude/commands/trigger-periodic.md: sha256:44fce4b6e9db3a31c355f670681e4d4f80a0e9750a4c71759173c78b2a55949b
     .claude/commands/trigger-postsubmit.md: sha256:25d941b3db9b2042d31ce0acac967b923fbd152d95fb8d120e7e0a4623be346b
     .claude/commands/trigger-presubmit.md: sha256:e424baca0c7355e94138f4040155324b5a7ac30abf6fde83772e909364710f3b
+    .claude/skills/add-jira-triage-link/SKILL.md: sha256:ba549b17111e05fa79225e48fb6f00b86551026e741254ef4a32c8d327aedb5e
+    .claude/skills/add-jira-triage-link/add_jira_triage_link.py: sha256:210fc188bc578be2db018e2cdf75a172b3902b0ced1185a60876c4a0e84c040f
+    .claude/skills/analyze-disruption/SKILL.md: sha256:b07191c6a058044f253908ec6b06f422349f582df07e1077393fb097ea60a06d
+    .claude/skills/analyze-disruption/parse_disruption.py: sha256:4a481eed0cdfdbb692251caf5b04b20986e360a8292f0015764e86e0f7bbac8b
+    .claude/skills/analyze-payload/SKILL.md: sha256:c959ff1d79263faa92679e80e5382afef5c338fd6f972e4a89897323bca36250
+    .claude/skills/fetch-jira-issue/README.md: sha256:0729c32c9e822c82227f92a2c0f456e7b6995b5a6904a8cb0338f8777afdad7f
+    .claude/skills/fetch-jira-issue/SKILL.md: sha256:9ad24674947aad070d94075399f084c663540b0849c1bf0774540e7f898b41e7
+    .claude/skills/fetch-jira-issue/fetch_jira_issue.py: sha256:020d39b6cdfaa83fec0c15d56bce659309c8a769a965c9effc0e9d310fe7d8a1
+    .claude/skills/fetch-job-run-summary/SKILL.md: sha256:2b7c4df270dbec8115e92907283b312f3aca138f543d0b6e9b98356381bf9ed4
+    .claude/skills/fetch-job-run-summary/fetch_job_run_summary.py: sha256:d49bb6a086dc9fac688337fe3710e2c9b71651b716c86c69d2273bd87c9fdacf
+    .claude/skills/fetch-new-prs-in-payload/SKILL.md: sha256:668347061388ecf61f26f8282010205b32061724d49f398c4fd08fc9a7d9dc95
+    .claude/skills/fetch-new-prs-in-payload/fetch_new_prs_in_payload.py: sha256:d2efc94b49f9d4dcbf0f1cb03cffe2c796f1076eb1fba8fd212004b88a6a3b3f
+    .claude/skills/fetch-payloads/SKILL.md: sha256:6414d0d178debabb8bd9d7858d26bd15b850aeefd79c74d7458e008388e77623
+    .claude/skills/fetch-payloads/fetch_payloads.py: sha256:99f1350f1de15408d88b212faaa6d07100f154732bbc75b18a4863517226af9b
+    .claude/skills/fetch-prowjob-json/SKILL.md: sha256:9a89cdd0851b5cd73413f34402773d8babdb0da2c913c13fd5dad20b8ad84591
+    .claude/skills/fetch-regression-details/README.md: sha256:36e8ba4f19afdc965a9bccadad9e125d6d024db783c009ca85acea7cf6eac8d5
+    .claude/skills/fetch-regression-details/SKILL.md: sha256:b3b7f189553194622d31b402da63c2744c5fe86fd4f6d475b60fbfc117bfff05
+    .claude/skills/fetch-regression-details/fetch_regression_details.py: sha256:58babcf1e84476ac594ea15d0bcdd7072045b668992aff8477291d224bbe5698
+    .claude/skills/fetch-related-triages/SKILL.md: sha256:c87272a45f554dbb1a534820f224b67c3c485cd52a0cd99218f0d459c29164c4
+    .claude/skills/fetch-related-triages/fetch_related_triages.py: sha256:62cefbab4a97b029bda7420b9d8fcfaa1b0cfcb1ef97e45f00b7f88a1a07fea1
+    .claude/skills/fetch-releases/SKILL.md: sha256:8b1dca0224ae5e73e7cc6b760976aa72bb17c0937cb1b27199fa28a8c068bd2d
+    .claude/skills/fetch-releases/fetch_releases.py: sha256:2a23561860884dec97cdc7bc52e8ce9ca4c062f2b8b3482d17f32e3c20167a85
+    .claude/skills/fetch-test-report/SKILL.md: sha256:1503286744a0c3d11d13a766c0e94c76516063a3c878350a5f4404d8924bd44f
+    .claude/skills/fetch-test-report/fetch_test_report.py: sha256:ec0958a270ecaa277a138ddc6de7ec3ded29f6dae77cad26a716d2785e69e13d
+    .claude/skills/fetch-test-runs/README.md: sha256:641f793fc845cef78c08bab1a5c3566615013bac466d7f84dc3198fb7795e084
+    .claude/skills/fetch-test-runs/SKILL.md: sha256:117b1b86e2ce041284f16e44af77553c7c14a6a83e4efbb98ca6d5fb9566c182
+    .claude/skills/fetch-test-runs/fetch_test_runs.py: sha256:64c258b86144c788d1ddc4ada308eb1b973ba82175817e85a2aefedadc5109ed
+    .claude/skills/oc-auth/README.md: sha256:0ed3db35cd4c899abf75ad858a6377ae47865c50b8d90246055121d720ef9d07
+    .claude/skills/oc-auth/SKILL.md: sha256:47d6cdf674b515c0fb85d383e2645d01f011bb9a1856026fc76cde92595ad7b1
+    .claude/skills/oc-auth/curl_with_token.sh: sha256:9042e0cd037b04d461659604ace5423e0902c258a588de3c37ea807830cbbe7d
+    .claude/skills/payload-autodl-json/SKILL.md: sha256:b3f570174192e09478294f0565c8b4f4822d689438c02c64a1ba181bcf9e1426
+    .claude/skills/payload-experimental-reverts/SKILL.md: sha256:18ece2dd6bb71191a5ac7ec023832e99ea95c91ff8ef53025e9df4ce5fabbfd9
+    .claude/skills/payload-results-yaml/SKILL.md: sha256:02a517d4888742c406b2e0abaa4c05bb017d83bffd405c62f30342e8083fe611
+    .claude/skills/prow-job-analyze-install-failure/SKILL.md: sha256:bb9268130b95de13d0b4eab77a6ea78d4820c730312a31598dea32eee34c85c2
+    .claude/skills/prow-job-analyze-metal-install-failure/SKILL.md: sha256:8e42f8f404e927821b3dd6bcf720971abc243a1d98b94520d8f62cf23da33f7d
+    .claude/skills/prow-job-analyze-resource/CHANGELOG.md: sha256:5570ed5614f32fdcc2ba0925099ce2b9d81fd1fda3dbd0e6ce4b8fd5d496cd83
+    .claude/skills/prow-job-analyze-resource/README.md: sha256:8ec2f35c2d4203d412c3f88b9a0928083b760dabe2ba19c65c1d480eb07faa8e
+    .claude/skills/prow-job-analyze-resource/SCRIPTS.md: sha256:5ffa91032366b44b73bff717cf3619fa275796784211fc21de0d561d6e1c41d3
+    .claude/skills/prow-job-analyze-resource/SKILL.md: sha256:4523de74229ecd4033ee00e66fbc97f674f0043162082c0442e54983823e0241
+    .claude/skills/prow-job-analyze-resource/create_context_html_files.py: sha256:f68ff6edd0c0dd970d93eb6cd7c9e2527da07861553c4a89c42c9f89d7c82811
+    .claude/skills/prow-job-analyze-resource/create_inline_html_files.py: sha256:1c6b33485aec491c8f1e7e6e87d198624d21d067789a240732f8962a0898ae2c
+    .claude/skills/prow-job-analyze-resource/generate_html_report.py: sha256:d2bd578b9740f44abc384b2aa86b83e8ced0abc58501d905a633fccdc689c21e
+    .claude/skills/prow-job-analyze-resource/generate_report.py: sha256:080db81cc51ae0bbfb35920424a530cc4e0030c67a1621af1013fe9cb8673aa8
+    .claude/skills/prow-job-analyze-resource/parse_all_logs.py: sha256:93a7a79c04262519f8383e50ec1181643795480da150c3619eadb73a72f86186
+    .claude/skills/prow-job-analyze-resource/parse_audit_logs.py: sha256:a04c1b5665ecc9d0c00271a3efc75068276182e2612df99e81dcebd86b7166e0
+    .claude/skills/prow-job-analyze-resource/parse_pod_logs.py: sha256:fc635f4919c0c948bfe7aa0c8681b92852f5840239a550e6ac414d67da736801
+    .claude/skills/prow-job-analyze-resource/parse_url.py: sha256:94f033b86a586e66d57e29037de3a411b7ad02656836df980e028b49168b809d
+    .claude/skills/prow-job-analyze-resource/prow_job_resource_grep.sh: sha256:5e348e4454bf47b6b5a145aba93dbdbae4cacab399c55df9b1535ffd661e0aa5
+    .claude/skills/prow-job-analyze-resource/report_template.html: sha256:0a5dacd433b9258800ae645bcd413369ef4c7efe67fafd7fb02feb435f24ab80
+    .claude/skills/prow-job-analyze-test-failure/README.md: sha256:8b2f6243ca23eec0190db630a78cd0185a69baccd71bfcde2c7dcd94bd0608e5
+    .claude/skills/prow-job-analyze-test-failure/SKILL.md: sha256:f9ce686399c7e5e78bf7fc01a69e72f24b909ccd55d4debccdf0c98cc3203fe6
+    .claude/skills/prow-job-artifact-search/SKILL.md: sha256:5ddcdb7377756ba849a54e384d613548ea2ad03d3a28d15a249318f73fcb62a1
+    .claude/skills/prow-job-artifact-search/prow_job_artifact_search.py: sha256:67f3890a4cd4e587b7d87113d22d361f9fa17edff4d92c8efc79afe0665dd724
+    .claude/skills/prow-job-extract-must-gather/CHANGELOG.md: sha256:0b32a81e22294256e44d3b6eaf55dd5d7666ebf8f3df9750766a5db868df6b30
+    .claude/skills/prow-job-extract-must-gather/README.md: sha256:e23752d654bb890eaefc4594246490f0276c2979896cf4122fad25f0288783d9
+    .claude/skills/prow-job-extract-must-gather/SKILL.md: sha256:46426407e38637eaaf6a5bd09de076a71daec108892b225ac7d8504e4fa98c35
+    .claude/skills/prow-job-extract-must-gather/extract_archives.py: sha256:a9fc2466a2b3bfb964626c7084d6cc65bdc0affe475c2541c995bddeb1ef216f
+    .claude/skills/prow-job-extract-must-gather/generate_html_report.py: sha256:255fdcdf53bde1965763baa100903716102cd1a6aa53a29a34a519ba5e66a239
+    .claude/skills/revert-pr/SKILL.md: sha256:6384b29b6a6b2c4893539a262cf4a9d2104f91d8bba426bbecd065cce8e4a4f4
+    .claude/skills/set-release-blocker/SKILL.md: sha256:7ba2e5752a4c8c7e1bdc25c266550f1fed74f70eb14318a8c00dcbccba7ee5c9
+    .claude/skills/set-release-blocker/set_release_blocker.py: sha256:aba9673762c3244a5545ed8c5f0bfa9f8595a7a3655b043d60d51934868a84ab
+    .claude/skills/stage-payload-reverts/SKILL.md: sha256:7a49ca1aaa05632c2b515338fd5d5849e957a63407561b81babc92ed3d3c371f
+    .claude/skills/triage-regression/README.md: sha256:9ee2600c752d9d58569858aafc46fe645959ce115d01961605838b6bcb6d50ab
+    .claude/skills/triage-regression/SKILL.md: sha256:f890ef4c6894ea6ff6cbe68a48c0090ab1cf7a5cee5c7527aa4b4abbdb5eaeec
+    .claude/skills/triage-regression/triage_regression.py: sha256:735e2d210f510953beabf47c3b7146f8ca789d1c3cb8fd3fe9d31a56c6446748
+    .claude/skills/trigger-payload-job/SKILL.md: sha256:c5ed4db98aaac22090ac24ed18aed800f9145c19b62e1e39253782cd4e336e5d
   content_hash: sha256:25fe02d99a08ce007e3771f3b605e22c8813438fd5e519c170201ecd23c3df47
 - repo_url: openshift-eng/ai-helpers
   host: github.com
@@ -113,18 +245,45 @@ dependencies:
   - .claude/commands/list-regressions.md
   - .claude/commands/list-teams.md
   - .claude/skills/analyze-regressions
+  - .claude/skills/analyze-regressions/README.md
+  - .claude/skills/analyze-regressions/SKILL.md
+  - .claude/skills/analyze-regressions/generate_html_report.py
+  - .claude/skills/analyze-regressions/report_template.html
   - .claude/skills/coderabbit-adoption
+  - .claude/skills/coderabbit-adoption/SKILL.md
+  - .claude/skills/coderabbit-adoption/allowed-repos.txt
+  - .claude/skills/coderabbit-adoption/coderabbit_adoption.py
   - .claude/skills/coderabbit-inheritance-scanner-check
+  - .claude/skills/coderabbit-inheritance-scanner-check/SKILL.md
   - .claude/skills/coderabbit-inheritance-scanner-existing-pr
+  - .claude/skills/coderabbit-inheritance-scanner-existing-pr/SKILL.md
   - .claude/skills/coderabbit-inheritance-scanner-open-pr
+  - .claude/skills/coderabbit-inheritance-scanner-open-pr/SKILL.md
   - .claude/skills/coderabbit-inheritance-scanner-search
+  - .claude/skills/coderabbit-inheritance-scanner-search/SKILL.md
   - .claude/skills/coderabbit-rules-from-pr-reviews
+  - .claude/skills/coderabbit-rules-from-pr-reviews/SKILL.md
+  - .claude/skills/coderabbit-rules-from-pr-reviews/fetch_pr_comments.py
   - .claude/skills/get-release-dates
+  - .claude/skills/get-release-dates/README.md
+  - .claude/skills/get-release-dates/SKILL.md
+  - .claude/skills/get-release-dates/get_release_dates.py
   - .claude/skills/list-components
+  - .claude/skills/list-components/SKILL.md
+  - .claude/skills/list-components/list_components.py
   - .claude/skills/list-jiras
+  - .claude/skills/list-jiras/SKILL.md
+  - .claude/skills/list-jiras/list_jiras.py
   - .claude/skills/list-regressions
+  - .claude/skills/list-regressions/README.md
+  - .claude/skills/list-regressions/SKILL.md
+  - .claude/skills/list-regressions/list_regressions.py
   - .claude/skills/list-teams
+  - .claude/skills/list-teams/SKILL.md
+  - .claude/skills/list-teams/list_teams.py
   - .claude/skills/summarize-jiras
+  - .claude/skills/summarize-jiras/SKILL.md
+  - .claude/skills/summarize-jiras/summarize_jiras.py
   deployed_file_hashes:
     .claude/commands/coderabbit-adoption-report.md: sha256:881a52c84f91b76e23a2fee0e7d46f84d3124592e7d4a26f5be724345ec72e65
     .claude/commands/coderabbit-inheritance-scanner.md: sha256:22d3b0619011c5326bafe6d729eb44ca66492343a9c9aee26e37b28f9959c058
@@ -136,4 +295,31 @@ dependencies:
     .claude/commands/list-jiras.md: sha256:4ab0bf9f08adf00bc5d7892a47bb64a75ff694088c53d98dcfb7d079e552c6f5
     .claude/commands/list-regressions.md: sha256:c9ddd10a7e6a321613565c38f58874283225892cb6e8a26515433fa4c2949966
     .claude/commands/list-teams.md: sha256:b004ef72ffc006855e5af3749cb17d3748470eb0b556eb0d17df21bd619635f2
+    .claude/skills/analyze-regressions/README.md: sha256:62b23e371e6be4598be688053d33cf0cdea3f7a7d1ef301103a5f1dac705769c
+    .claude/skills/analyze-regressions/SKILL.md: sha256:9f1293f233b35ccd73c30e891e362252ba259600f8a7c531aabe8b4b12740ace
+    .claude/skills/analyze-regressions/generate_html_report.py: sha256:1131110ed0827e291567cc9a2652ad8125242ebc5b5bb4b5fe997eca85f93de2
+    .claude/skills/analyze-regressions/report_template.html: sha256:8f8602c615b75fa987033c35813079cc789569d32cdc44fb59d11bcda4b7f28a
+    .claude/skills/coderabbit-adoption/SKILL.md: sha256:8b852271beca7d6c2ce26e224417b8ed29ba331f6dc4c5c03874d16e8cc2966d
+    .claude/skills/coderabbit-adoption/allowed-repos.txt: sha256:cc8eade8fa50e20456b013dca77ec460ac0ed0ea19ab02cf5175cb64aef93eb1
+    .claude/skills/coderabbit-adoption/coderabbit_adoption.py: sha256:de0745b51dbee0df45d0c0f65db9c73452f780b2474c9aebb8de7ae3d206ba9d
+    .claude/skills/coderabbit-inheritance-scanner-check/SKILL.md: sha256:0b5bcbe93b021b3583ad7c6fa06a411d96b8aaca8f75727d9357714fe097aad2
+    .claude/skills/coderabbit-inheritance-scanner-existing-pr/SKILL.md: sha256:1ec235868456f5b42cb67806f0e1cf12fedaeeda120571d9d992b8b0f146d090
+    .claude/skills/coderabbit-inheritance-scanner-open-pr/SKILL.md: sha256:7bec6d3e219d509b8c78cb246751afbb93a4bbff44f4a2bc2305a6806114ae00
+    .claude/skills/coderabbit-inheritance-scanner-search/SKILL.md: sha256:3bcf3b9342f376790280b0865e8b14c92a9da6e6f3a0ae2bcc1abf7093032286
+    .claude/skills/coderabbit-rules-from-pr-reviews/SKILL.md: sha256:ee4566269bbe1f1e05d34d4f90d1752dc0d4f4dfa792a204cdf8fc1bc523a1cf
+    .claude/skills/coderabbit-rules-from-pr-reviews/fetch_pr_comments.py: sha256:a2ed1f5a6f116f78928f4891905e88edad70fba935ba1a3831dbd370520a2850
+    .claude/skills/get-release-dates/README.md: sha256:86aeba857111d2e83493131565d3d80f143d3d56a324016d03bdbf5fc4982b3f
+    .claude/skills/get-release-dates/SKILL.md: sha256:6f8dcc946f0ed4ef3b75e2d296f8e8216f50515588f810a6e283e865d5b18891
+    .claude/skills/get-release-dates/get_release_dates.py: sha256:5150290c606b136bfdf3c15f106baf091344ffca92632232a5a2026b3d6b6127
+    .claude/skills/list-components/SKILL.md: sha256:e0c77b884ae36e4eee08660454f6c73b7c02c3efb5dc66595b4b182ec3f12772
+    .claude/skills/list-components/list_components.py: sha256:a36ef028fb09ec67d758588e8931cef5fa3f5c56b475b7bc765c05767ca21eb8
+    .claude/skills/list-jiras/SKILL.md: sha256:10151fd7ea32b7b5360f83eee361d7fe25612388eba87d59e21d5c74cec1d977
+    .claude/skills/list-jiras/list_jiras.py: sha256:e4415832790320354d003d8381754334614dc4a961fc75778e8c5f0b678ea724
+    .claude/skills/list-regressions/README.md: sha256:78ee9e2ecee07374b67b967f816fe08fe0bb3ebfa8ea4aa3416719be1b22fea5
+    .claude/skills/list-regressions/SKILL.md: sha256:4bb99e5e26811c59241c8d53e82a31d33f88f964fe0a4248a5d287d3c8cfb3e4
+    .claude/skills/list-regressions/list_regressions.py: sha256:1fc5db7129f6cda218f68ef26bf58b08303bba765d1a115a92370faeb60608f2
+    .claude/skills/list-teams/SKILL.md: sha256:9d33e27a6a8305516c0ecd462e8dae05f74dc692a8a787e57dfc99513f188b8c
+    .claude/skills/list-teams/list_teams.py: sha256:a61b373e58936f8a224f4f60c89cdd03940d8cfdc3371e8b3df9a597b75e5a20
+    .claude/skills/summarize-jiras/SKILL.md: sha256:f7c22753a6d08c84b41f025efb7f425f138e2ed646a1ad19f6cb9a04fe2e9072
+    .claude/skills/summarize-jiras/summarize_jiras.py: sha256:de62020b508e67b46f32a8f374a86af6b915635f1bb195080dcfd57e4f1d12b8
   content_hash: sha256:526a7de901df135c759d88b50ba468fe02ccf03aadd68f65d8c3e1bac7f90a41
